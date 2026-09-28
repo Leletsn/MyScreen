@@ -137,18 +137,77 @@ io.on("connection", (socket) => {
         });
     });
 
+    socket.on("sair-da-sala", () => {
+
+    const codigoSala = socket.sala;
+
+        if (!codigoSala) {
+            return;
+        }
+
+        console.log(
+        `🚪 ${socket.nome} saiu da sala ${codigoSala}`
+        );
+
+        // Se essa pessoa estava transmitindo
+        if (transmissores.get(codigoSala) === socket.id) {
+
+         transmissores.delete(codigoSala);
+
+            socket.to(codigoSala).emit(
+            "transmissao-parada"
+            );
+        }
+
+        // Avisar as outras pessoas
+        socket.to(codigoSala).emit(
+            "pessoa-saiu",
+            {
+                id: socket.id,
+                nome: socket.nome
+            }
+        );
+
+        // Tirar a pessoa da sala
+        socket.leave(codigoSala);
+
+        // Limpar os dados da pessoa
+        socket.sala = null;
+        socket.nome = null;
+    });
+
     socket.on("disconnect", () => {
 
-        console.log(`👋 ${socket.id} saiu do servidor.`);
+    console.log(
+        `👋 ${socket.nome || socket.id} saiu do servidor.`
+    );
 
-        for (const [sala, transmissor] of transmissores) {
+    const codigoSala = socket.sala;
 
-            if (transmissor === socket.id) {
-                transmissores.delete(sala);
-                socket.to(sala).emit("transmissao-parada");
-            }
+    if (!codigoSala) {
+        return;
+    }
+
+    // Se a pessoa estava transmitindo
+    if (transmissores.get(codigoSala) === socket.id) {
+
+        transmissores.delete(codigoSala);
+
+        socket.to(codigoSala).emit(
+            "transmissao-parada"
+        );
+    }
+
+    // Avisar as outras pessoas
+    // que essa pessoa saiu
+    socket.to(codigoSala).emit(
+        "pessoa-saiu",
+        {
+            id: socket.id,
+            nome: socket.nome
         }
-    });
+    );
+});
 
 });
 

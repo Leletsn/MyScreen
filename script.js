@@ -12,6 +12,7 @@ const codigoSala = document.getElementById("codigoSala");
 const statusSala = document.getElementById("statusSala");
 
 const btnCopiar = document.getElementById("btnCopiar");
+const btnSairSala = document.getElementById("btnSairSala");
 const btnCompartilhar = document.getElementById("btnCompartilhar");
 
 const video = document.getElementById("videoTela");
@@ -99,7 +100,6 @@ function entrarNaSala(codigo) {
     );
 }
 
-
 // ==============================
 // COPIAR CÓDIGO
 // ==============================
@@ -116,6 +116,61 @@ btnCopiar.addEventListener("click", async () => {
             "📋 Copiar código";
 
     }, 2000);
+});
+
+// ==============================
+// SAIR DA SALA
+// ==============================
+
+btnSairSala.addEventListener("click", () => {
+
+    if (!salaAtual) {
+        return;
+    }
+
+    const confirmou = confirm(
+        "Tem certeza que deseja sair da sala?"
+    );
+
+    if (!confirmou) {
+        return;
+    }
+
+    // Se estiver transmitindo, parar primeiro
+    if (streamTela) {
+        pararCompartilhamento();
+    }
+
+    // Avisar o servidor
+    socket.emit("sair-da-sala");
+
+    // Fechar conexões WebRTC
+    Object.values(conexoes).forEach((conexao) => {
+        conexao.close();
+    });
+
+    conexoes = {};
+
+    // Limpar vídeos
+    video.srcObject = null;
+    videoRemoto.srcObject = null;
+
+    // Limpar sala
+    salaAtual = null;
+    souTransmissor = false;
+
+    // Esconder área da sala
+    areaSala.style.display = "none";
+
+    // Limpar lista de participantes
+    listaParticipantes.innerHTML = "";
+
+    // Limpar código
+    codigoSala.textContent = "";
+
+    statusSala.textContent = "";
+
+    console.log("🚪 Você saiu da sala.");
 });
 
 
@@ -215,7 +270,6 @@ function criarConexao(idPessoa, transmissor = false) {
         }
     };
 
-
     // =================================
     // ESTADO DA CONEXÃO
     // =================================
@@ -231,7 +285,6 @@ function criarConexao(idPessoa, transmissor = false) {
 
     return conexao;
 }
-
 
 // ==============================
 // COMPARTILHAR TELA
@@ -306,7 +359,6 @@ btnCompartilhar.addEventListener(
         }
     }
 );
-
 
 // ==============================
 // PARAR COMPARTILHAMENTO
@@ -624,6 +676,30 @@ socket.on("nova-pessoa", (dados) => {
     console.log(
         `👤 ${dados.nome} entrou na sala`
     );
+});
+
+socket.on("pessoa-saiu", (dados) => {
+
+    console.log(
+        `👋 ${dados.nome} saiu da sala`
+    );
+
+    const participante =
+        document.querySelector(
+            `[data-id="${dados.id}"]`
+        );
+
+    if (participante) {
+        participante.remove();
+    }
+
+    // Fechar conexão WebRTC dessa pessoa
+    const conexao = conexoes[dados.id];
+
+    if (conexao) {
+        conexao.close();
+        delete conexoes[dados.id];
+    }
 });
 
 // ==============================
