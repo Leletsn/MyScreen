@@ -1,39 +1,113 @@
 const socket = io();
 
-const btnCriarSala = document.getElementById("btnCriarSala");
-const btnEntrarSala = document.getElementById("btnEntrarSala");
-const inputSala = document.getElementById("inputSala");
 
-const inputNome = document.getElementById("inputNome");
-const listaParticipantes = document.getElementById("listaParticipantes");
+// ==============================
+// ELEMENTOS
+// ==============================
 
-const areaSala = document.getElementById("areaSala");
-const codigoSala = document.getElementById("codigoSala");
-const statusSala = document.getElementById("statusSala");
+const btnCriarSala =
+    document.getElementById("btnCriarSala");
 
-const btnCopiar = document.getElementById("btnCopiar");
-const btnSairSala = document.getElementById("btnSairSala");
-const btnCompartilhar = document.getElementById("btnCompartilhar");
+const btnEntrarSala =
+    document.getElementById("btnEntrarSala");
 
-const video = document.getElementById("videoTela");
-const videoRemoto = document.getElementById("videoRemoto");
+const inputSala =
+    document.getElementById("inputSala");
 
-const btnTelaCheia = document.getElementById("btnTelaCheia");
-const btnTelaCheiaLocal = document.getElementById("btnTelaCheiaLocal");
+const inputNome =
+    document.getElementById("inputNome");
+
+const listaParticipantes =
+    document.getElementById("listaParticipantes");
+
+const areaSala =
+    document.getElementById("areaSala");
+
+const codigoSala =
+    document.getElementById("codigoSala");
+
+const statusSala =
+    document.getElementById("statusSala");
+
+const btnCopiar =
+    document.getElementById("btnCopiar");
+
+const btnSairSala =
+    document.getElementById("btnSairSala");
+
+const btnCompartilhar =
+    document.getElementById("btnCompartilhar");
+
+const btnMicrofone =
+    document.getElementById("btnMicrofone");
+
+const video =
+    document.getElementById("videoTela");
+
+const videoRemoto =
+    document.getElementById("videoRemoto");
+
+const btnTelaCheia =
+    document.getElementById("btnTelaCheia");
+
+const btnTelaCheiaLocal =
+    document.getElementById("btnTelaCheiaLocal");
+
+
+// ==============================
+// VARIÁVEIS
+// ==============================
 
 let salaAtual = null;
+
 let streamTela = null;
+
+let streamMicrofone = null;
+
+let streamAudioRemoto =
+    new MediaStream();
+
 let souTransmissor = false;
+
+let microfoneLigado = false;
+
 let meuNome = "";
 
+
+// Conexões da tela
 let conexoes = {};
 
+
+// Conexões do microfone
+let conexoesMicrofone = {};
+
+
+// Áudio remoto separado do vídeo
+const audioRemoto =
+    new Audio();
+
+audioRemoto.autoplay = true;
+
+audioRemoto.controls = false;
+
+audioRemoto.volume = 1;
+
+
+// ==============================
+// CONFIGURAÇÃO WEBRTC
+// ==============================
+
 const configuracaoWebRTC = {
+
     iceServers: [
+
         {
-            urls: "stun:stun.l.google.com:19302"
+            urls:
+                "stun:stun.l.google.com:19302"
         }
+
     ]
+
 };
 
 
@@ -41,55 +115,95 @@ const configuracaoWebRTC = {
 // CRIAR SALA
 // ==============================
 
-btnCriarSala.addEventListener("click", () => {
+btnCriarSala.addEventListener(
+    "click",
+    () => {
 
-    const codigo = Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase();
+        const codigo =
+            Math.random()
+                .toString(36)
+                .substring(2, 8)
+                .toUpperCase();
 
-    entrarNaSala(codigo);
-});
+
+        entrarNaSala(codigo);
+
+    }
+);
 
 
 // ==============================
 // ENTRAR NA SALA
 // ==============================
 
-btnEntrarSala.addEventListener("click", () => {
+btnEntrarSala.addEventListener(
+    "click",
+    () => {
 
-    const codigo = inputSala.value.trim().toUpperCase();
+        const codigo =
+            inputSala.value
+                .trim()
+                .toUpperCase();
 
-    if (codigo === "") {
-        alert("Digite o código da sala!");
-        return;
+
+        if (codigo === "") {
+
+            alert(
+                "Digite o código da sala!"
+            );
+
+            return;
+        }
+
+
+        entrarNaSala(codigo);
+
     }
+);
 
-    entrarNaSala(codigo);
-});
 
+// ==============================
+// FUNÇÃO ENTRAR NA SALA
+// ==============================
 
 function entrarNaSala(codigo) {
 
-    meuNome = inputNome.value.trim();
+    meuNome =
+        inputNome.value.trim();
+
 
     if (meuNome === "") {
-        alert("Digite seu nome antes de entrar na sala!");
+
+        alert(
+            "Digite seu nome antes de entrar na sala!"
+        );
+
         inputNome.focus();
+
         return;
     }
 
+
     salaAtual = codigo;
+
 
     codigoSala.textContent =
         `Código da sala: ${codigo}`;
 
-    areaSala.style.display = "block";
+
+    areaSala.style.display =
+        "block";
+
 
     statusSala.textContent =
         "🟢 Você está na sala!";
-        
-    adicionarParticipante(socket.id,meuNome);
+
+
+    adicionarParticipante(
+        socket.id,
+        meuNome
+    );
+
 
     socket.emit(
         "entrar-na-sala",
@@ -98,193 +212,650 @@ function entrarNaSala(codigo) {
             nome: meuNome
         }
     );
+
 }
+
 
 // ==============================
 // COPIAR CÓDIGO
 // ==============================
 
-btnCopiar.addEventListener("click", async () => {
+btnCopiar.addEventListener(
+    "click",
+    async () => {
 
-    await navigator.clipboard.writeText(salaAtual);
+        await navigator.clipboard
+            .writeText(salaAtual);
 
-    btnCopiar.textContent = "✅ Copiado!";
-
-    setTimeout(() => {
 
         btnCopiar.textContent =
-            "📋 Copiar código";
+            "✅ Copiado!";
 
-    }, 2000);
-});
+
+        setTimeout(
+            () => {
+
+                btnCopiar.textContent =
+                    "📋 Copiar código";
+
+            },
+            2000
+        );
+
+    }
+);
+
 
 // ==============================
 // SAIR DA SALA
 // ==============================
 
-btnSairSala.addEventListener("click", () => {
+btnSairSala.addEventListener(
+    "click",
+    () => {
 
-    if (!salaAtual) {
-        return;
+        if (!salaAtual) {
+            return;
+        }
+
+
+        const confirmou =
+            confirm(
+                "Tem certeza que deseja sair da sala?"
+            );
+
+
+        if (!confirmou) {
+            return;
+        }
+
+
+        // Parar tela
+        if (streamTela) {
+
+            pararCompartilhamento();
+
+        }
+
+
+        // Parar microfone
+        if (streamMicrofone) {
+
+            pararMicrofoneLocal();
+
+        }
+
+
+        // Avisar servidor
+        socket.emit(
+            "sair-da-sala"
+        );
+
+
+        // Fechar conexões da tela
+        Object.values(
+            conexoes
+        ).forEach(
+            (conexao) => {
+
+                conexao.close();
+
+            }
+        );
+
+
+        // Fechar conexões de áudio
+        Object.values(
+            conexoesMicrofone
+        ).forEach(
+            (conexao) => {
+
+                conexao.close();
+
+            }
+        );
+
+
+        conexoes = {};
+
+        conexoesMicrofone = {};
+
+
+        // Limpar mídia
+        video.srcObject = null;
+
+        videoRemoto.srcObject = null;
+
+        streamAudioRemoto =
+            new MediaStream();
+
+        audioRemoto.srcObject = null;
+
+
+        // Limpar sala
+        salaAtual = null;
+
+        souTransmissor = false;
+
+        microfoneLigado = false;
+
+
+        // Esconder sala
+        areaSala.style.display =
+            "none";
+
+
+        // Limpar participantes
+        listaParticipantes.innerHTML =
+            "";
+
+
+        codigoSala.textContent =
+            "";
+
+
+        statusSala.textContent =
+            "";
+
+
+        btnMicrofone.textContent =
+            "🎤 Microfone";
+
+
+        console.log(
+            "🚪 Você saiu da sala."
+        );
+
     }
-
-    const confirmou = confirm(
-        "Tem certeza que deseja sair da sala?"
-    );
-
-    if (!confirmou) {
-        return;
-    }
-
-    // Se estiver transmitindo, parar primeiro
-    if (streamTela) {
-        pararCompartilhamento();
-    }
-
-    // Avisar o servidor
-    socket.emit("sair-da-sala");
-
-    // Fechar conexões WebRTC
-    Object.values(conexoes).forEach((conexao) => {
-        conexao.close();
-    });
-
-    conexoes = {};
-
-    // Limpar vídeos
-    video.srcObject = null;
-    videoRemoto.srcObject = null;
-
-    // Limpar sala
-    salaAtual = null;
-    souTransmissor = false;
-
-    // Esconder área da sala
-    areaSala.style.display = "none";
-
-    // Limpar lista de participantes
-    listaParticipantes.innerHTML = "";
-
-    // Limpar código
-    codigoSala.textContent = "";
-
-    statusSala.textContent = "";
-
-    console.log("🚪 Você saiu da sala.");
-});
+);
 
 
 // ==============================
-// CRIAR CONEXÃO
+// CONEXÃO DA TELA
 // ==============================
 
-function criarConexao(idPessoa, transmissor = false) {
+function criarConexao(
+    idPessoa,
+    transmissor = false
+) {
 
     console.log(
-        "🔗 Criando conexão com:",
+        "🖥️ Criando conexão de tela com:",
         idPessoa
     );
+
 
     const conexao =
         new RTCPeerConnection(
             configuracaoWebRTC
         );
 
-    conexoes[idPessoa] = conexao;
+
+    conexoes[idPessoa] =
+        conexao;
 
 
-    // =================================
-    // SE FOR TRANSMISSOR
-    // =================================
+    // ==========================
+    // TRANSMISSOR
+    // ==========================
 
-    if (transmissor && streamTela) {
+    if (
+        transmissor &&
+        streamTela
+    ) {
 
         streamTela
-            .getTracks()
-            .forEach((track) => {
+            .getVideoTracks()
+            .forEach(
+                (track) => {
 
-                conexao.addTrack(
-                    track,
-                    streamTela
-                );
+                    conexao.addTrack(
+                        track,
+                        streamTela
+                    );
 
-            });
+                }
+            );
+
     }
 
 
-    // =================================
-    // SE FOR ESPECTADOR
-    // =================================
+    // ==========================
+    // ESPECTADOR
+    // ==========================
 
     if (!transmissor) {
 
         conexao.addTransceiver(
             "video",
             {
-                direction: "recvonly"
+                direction:
+                    "recvonly"
             }
         );
+
+    }
+
+
+    // ==========================
+    // RECEBER TELA
+    // ==========================
+
+    conexao.ontrack =
+        (evento) => {
+
+            console.log(
+                "📺 Tela recebida!"
+            );
+
+
+            videoRemoto.srcObject =
+                evento.streams[0];
+
+
+            videoRemoto.muted =
+                true;
+
+
+            videoRemoto.play()
+                .catch(
+                    (erro) => {
+
+                        console.warn(
+                            "⚠️ Vídeo remoto não iniciou:",
+                            erro
+                        );
+
+                    }
+                );
+
+
+            statusSala.textContent =
+                "🟢 Recebendo transmissão!";
+
+        };
+
+
+    // ==========================
+    // ICE DA TELA
+    // ==========================
+
+    conexao.onicecandidate =
+        (evento) => {
+
+            if (
+                evento.candidate
+            ) {
+
+                socket.emit(
+                    "ice-candidate",
+                    {
+                        para: idPessoa,
+                        candidate:
+                            evento.candidate
+                    }
+                );
+
+            }
+
+        };
+
+
+    // ==========================
+    // ESTADO
+    // ==========================
+
+    conexao.onconnectionstatechange =
+        () => {
+
+            console.log(
+                "🌐 Estado WebRTC tela:",
+                conexao.connectionState
+            );
+
+        };
+
+
+    return conexao;
+
+}
+
+
+// ==============================
+// CONEXÃO DO MICROFONE
+// ==============================
+
+function criarConexaoMicrofone(
+    idPessoa,
+    transmissor = false
+) {
+
+    console.log(
+        "🎤 Criando conexão de áudio com:",
+        idPessoa
+    );
+
+
+    const conexao =
+        new RTCPeerConnection(
+            configuracaoWebRTC
+        );
+
+
+    conexoesMicrofone[idPessoa] =
+        conexao;
+
+
+    // ==========================
+    // TRANSMISSOR
+    // ==========================
+
+    if (
+        transmissor &&
+        streamMicrofone
+    ) {
+
+        streamMicrofone
+            .getAudioTracks()
+            .forEach(
+                (track) => {
+
+                    conexao.addTrack(
+                        track,
+                        streamMicrofone
+                    );
+
+                }
+            );
+
+    }
+
+
+    // ==========================
+    // ESPECTADOR
+    // ==========================
+
+    if (!transmissor) {
 
         conexao.addTransceiver(
             "audio",
             {
-                direction: "recvonly"
+                direction:
+                    "recvonly"
             }
         );
+
     }
 
 
-    // =================================
-    // RECEBER VÍDEO
-    // =================================
+    // ==========================
+    // RECEBER ÁUDIO
+    // ==========================
 
-    conexao.ontrack = (evento) => {
+    conexao.ontrack =
+        (evento) => {
 
-        console.log(
-            "📺 Transmissão recebida!"
-        );
-
-        videoRemoto.srcObject =
-            evento.streams[0];
-
-        statusSala.textContent =
-            "🟢 Recebendo transmissão!";
-    };
-
-
-    // =================================
-    // ICE
-    // =================================
-
-    conexao.onicecandidate = (evento) => {
-
-        if (evento.candidate) {
-
-            socket.emit(
-                "ice-candidate",
-                {
-                    para: idPessoa,
-                    candidate: evento.candidate
-                }
+            console.log(
+                "🎤 Áudio recebido!"
             );
-        }
-    };
 
-    // =================================
-    // ESTADO DA CONEXÃO
-    // =================================
 
-    conexao.onconnectionstatechange = () => {
+            streamAudioRemoto
+                .addTrack(
+                    evento.track
+                );
 
-        console.log(
-            "🌐 Estado WebRTC:",
-            conexao.connectionState
-        );
-    };
+
+            audioRemoto.srcObject =
+                streamAudioRemoto;
+
+
+            audioRemoto.muted =
+                false;
+
+
+            audioRemoto.volume =
+                1;
+
+
+            audioRemoto.play()
+                .then(
+                    () => {
+
+                        console.log(
+                            "🔊 Áudio remoto reproduzindo!"
+                        );
+
+                    }
+                )
+                .catch(
+                    (erro) => {
+
+                        console.error(
+                            "❌ Navegador bloqueou o áudio:",
+                            erro
+                        );
+
+                    }
+                );
+
+        };
+
+
+    // ==========================
+    // ICE DO MICROFONE
+    // ==========================
+
+    conexao.onicecandidate =
+        (evento) => {
+
+            if (
+                evento.candidate
+            ) {
+
+                socket.emit(
+                    "ice-candidate-microfone",
+                    {
+                        para: idPessoa,
+                        candidate:
+                            evento.candidate
+                    }
+                );
+
+            }
+
+        };
+
+
+    // ==========================
+    // ESTADO
+    // ==========================
+
+    conexao.onconnectionstatechange =
+        () => {
+
+            console.log(
+                "🎤 Estado WebRTC áudio:",
+                conexao.connectionState
+            );
+
+        };
 
 
     return conexao;
+
 }
+
+
+// ==============================
+// MICROFONE
+// ==============================
+
+btnMicrofone.addEventListener(
+    "click",
+    async () => {
+
+        // ==========================
+        // PRIMEIRA VEZ
+        // ==========================
+
+        if (!streamMicrofone) {
+
+            try {
+
+                streamMicrofone =
+                    await navigator
+                        .mediaDevices
+                        .getUserMedia({
+                            audio: true
+                        });
+
+
+                microfoneLigado =
+                    true;
+
+
+                btnMicrofone.textContent =
+                    "🔇 Silenciar";
+
+
+                console.log(
+                    "🎤 Microfone ligado."
+                );
+
+
+                // Avisar servidor
+                socket.emit(
+                    "iniciar-microfone",
+                    salaAtual
+                );
+
+
+            } catch (erro) {
+
+                console.error(
+                    "❌ Não foi possível acessar o microfone:",
+                    erro
+                );
+
+
+                alert(
+                    "Não foi possível acessar o microfone."
+                );
+
+            }
+
+
+            return;
+
+        }
+
+
+        // ==========================
+        // LIGAR / DESLIGAR
+        // ==========================
+
+        microfoneLigado =
+            !microfoneLigado;
+
+
+        streamMicrofone
+            .getAudioTracks()
+            .forEach(
+                (track) => {
+
+                    track.enabled =
+                        microfoneLigado;
+
+                }
+            );
+
+
+        if (microfoneLigado) {
+
+            btnMicrofone.textContent =
+                "🔇 Silenciar";
+
+
+            console.log(
+                "🎤 Microfone ligado."
+            );
+
+
+            socket.emit(
+                "iniciar-microfone",
+                salaAtual
+            );
+
+
+        } else {
+
+            btnMicrofone.textContent =
+                "🎤 Microfone";
+
+
+            console.log(
+                "🔇 Microfone desligado."
+            );
+
+
+            socket.emit(
+                "parar-microfone",
+                salaAtual
+            );
+
+        }
+
+    }
+);
+
+
+// ==============================
+// PARAR MICROFONE LOCAL
+// ==============================
+
+function pararMicrofoneLocal() {
+
+    if (
+        streamMicrofone
+    ) {
+
+        streamMicrofone
+            .getTracks()
+            .forEach(
+                (track) => {
+
+                    track.stop();
+
+                }
+            );
+
+    }
+
+
+    streamMicrofone =
+        null;
+
+
+    microfoneLigado =
+        false;
+
+
+    btnMicrofone.textContent =
+        "🎤 Microfone";
+
+
+    if (salaAtual) {
+
+        socket.emit(
+            "parar-microfone",
+            salaAtual
+        );
+
+    }
+
+}
+
 
 // ==============================
 // COMPARTILHAR TELA
@@ -294,20 +865,21 @@ btnCompartilhar.addEventListener(
     "click",
     async () => {
 
-        // Se já estiver transmitindo,
-        // simplesmente para.
+        // Se já estiver transmitindo
         if (streamTela) {
 
             pararCompartilhamento();
 
             return;
+
         }
 
 
         try {
 
             streamTela =
-                await navigator.mediaDevices
+                await navigator
+                    .mediaDevices
                     .getDisplayMedia({
                         video: true,
                         audio: true
@@ -317,27 +889,29 @@ btnCompartilhar.addEventListener(
             video.srcObject =
                 streamTela;
 
-            souTransmissor = true;
+
+            souTransmissor =
+                true;
 
 
             btnCompartilhar.textContent =
                 "🛑 Parar compartilhamento";
 
+
             statusSala.textContent =
                 "🔴 Você está transmitindo!";
 
 
-            // Avisar servidor
             socket.emit(
                 "iniciar-transmissao",
                 salaAtual
             );
 
 
-            // Se o usuário clicar no
-            // botão nativo "Parar de compartilhar"
+            // Botão nativo do navegador
             const videoTrack =
-                streamTela.getVideoTracks()[0];
+                streamTela
+                    .getVideoTracks()[0];
 
 
             videoTrack.addEventListener(
@@ -353,12 +927,15 @@ btnCompartilhar.addEventListener(
         } catch (erro) {
 
             console.error(
-                "Erro ao compartilhar:",
+                "❌ Erro ao compartilhar:",
                 erro
             );
+
         }
+
     }
 );
+
 
 // ==============================
 // PARAR COMPARTILHAMENTO
@@ -375,19 +952,27 @@ function pararCompartilhamento() {
 
         streamTela
             .getTracks()
-            .forEach((track) => {
+            .forEach(
+                (track) => {
 
-                track.stop();
+                    track.stop();
 
-            });
+                }
+            );
+
     }
 
 
-    streamTela = null;
+    streamTela =
+        null;
 
-    souTransmissor = false;
 
-    video.srcObject = null;
+    souTransmissor =
+        false;
+
+
+    video.srcObject =
+        null;
 
 
     btnCompartilhar.textContent =
@@ -404,24 +989,29 @@ function pararCompartilhamento() {
     );
 
 
-    // Fechar conexões existentes
-
-    Object.values(conexoes)
-        .forEach((conexao) => {
+    // Fechar conexões de tela
+    Object.values(
+        conexoes
+    ).forEach(
+        (conexao) => {
 
             conexao.close();
 
-        });
+        }
+    );
 
 
     conexoes = {};
 
-    videoRemoto.srcObject = null;
+
+    videoRemoto.srcObject =
+        null;
+
 }
 
 
 // ==============================
-// TRANSMISSÃO DISPONÍVEL
+// TELA DISPONÍVEL
 // ==============================
 
 socket.on(
@@ -434,8 +1024,6 @@ socket.on(
         );
 
 
-        // Só o espectador cria a oferta
-
         const conexao =
             criarConexao(
                 idTransmissor,
@@ -447,24 +1035,176 @@ socket.on(
             await conexao.createOffer();
 
 
-        await conexao.setLocalDescription(
-            oferta
-        );
+        await conexao
+            .setLocalDescription(
+                oferta
+            );
 
 
         socket.emit(
             "oferta",
             {
                 para: idTransmissor,
-                oferta: conexao.localDescription
+                oferta:
+                    conexao.localDescription
             }
         );
+
     }
 );
 
 
 // ==============================
-// OFERTA RECEBIDA
+// MICROFONE DISPONÍVEL
+// ==============================
+
+socket.on(
+    "microfone-disponivel",
+    async (idPessoa) => {
+
+        console.log(
+            "🎤 Microfone disponível:",
+            idPessoa
+        );
+
+
+        const conexao =
+            criarConexaoMicrofone(
+                idPessoa,
+                false
+            );
+
+
+        const oferta =
+            await conexao.createOffer();
+
+
+        await conexao
+            .setLocalDescription(
+                oferta
+            );
+
+
+        socket.emit(
+            "oferta-microfone",
+            {
+                para: idPessoa,
+                oferta:
+                    conexao.localDescription
+            }
+        );
+
+    }
+);
+
+
+// ==============================
+// OFERTA DE MICROFONE RECEBIDA
+// ==============================
+
+socket.on(
+    "oferta-microfone",
+    async (dados) => {
+
+        console.log(
+            "📨 Oferta de microfone recebida!"
+        );
+
+
+        const conexao =
+            criarConexaoMicrofone(
+                dados.de,
+                true
+            );
+
+
+        await conexao
+            .setRemoteDescription(
+                new RTCSessionDescription(
+                    dados.oferta
+                )
+            );
+
+
+        const resposta =
+            await conexao.createAnswer();
+
+
+        await conexao
+            .setLocalDescription(
+                resposta
+            );
+
+
+        socket.emit(
+            "resposta-microfone",
+            {
+                para: dados.de,
+                resposta:
+                    conexao.localDescription
+            }
+        );
+
+    }
+);
+
+
+// ==============================
+// RESPOSTA DE MICROFONE
+// ==============================
+
+socket.on(
+    "resposta-microfone",
+    async (dados) => {
+
+        console.log(
+            "📨 Resposta de microfone recebida!"
+        );
+
+
+        const conexao =
+            conexoesMicrofone[
+                dados.de
+            ];
+
+
+        if (!conexao) {
+
+            console.error(
+                "❌ Conexão de microfone não encontrada."
+            );
+
+            return;
+        }
+
+
+        if (
+            conexao.signalingState !==
+            "have-local-offer"
+        ) {
+
+            console.warn(
+                "⚠️ Resposta de microfone ignorada. Estado:",
+                conexao.signalingState
+            );
+
+            return;
+        }
+
+
+        await conexao
+            .setRemoteDescription(
+                new RTCSessionDescription(
+                    dados.resposta
+                )
+            );
+
+    }
+);
+
+
+// ==============================
+// OFERTA DE TELA RECEBIDA
 // ==============================
 
 socket.on(
@@ -472,11 +1212,9 @@ socket.on(
     async (dados) => {
 
         console.log(
-            "📨 Oferta recebida!"
+            "📨 Oferta de tela recebida!"
         );
 
-
-        // Esta pessoa é o transmissor
 
         const conexao =
             criarConexao(
@@ -485,35 +1223,39 @@ socket.on(
             );
 
 
-        await conexao.setRemoteDescription(
-            new RTCSessionDescription(
-                dados.oferta
-            )
-        );
+        await conexao
+            .setRemoteDescription(
+                new RTCSessionDescription(
+                    dados.oferta
+                )
+            );
 
 
         const resposta =
             await conexao.createAnswer();
 
 
-        await conexao.setLocalDescription(
-            resposta
-        );
+        await conexao
+            .setLocalDescription(
+                resposta
+            );
 
 
         socket.emit(
             "resposta",
             {
                 para: dados.de,
-                resposta: conexao.localDescription
+                resposta:
+                    conexao.localDescription
             }
         );
+
     }
 );
 
 
 // ==============================
-// RESPOSTA RECEBIDA
+// RESPOSTA DE TELA
 // ==============================
 
 socket.on(
@@ -521,7 +1263,7 @@ socket.on(
     async (dados) => {
 
         console.log(
-            "📨 Resposta recebida!"
+            "📨 Resposta de tela recebida!"
         );
 
 
@@ -532,15 +1274,12 @@ socket.on(
         if (!conexao) {
 
             console.error(
-                "❌ Conexão não encontrada."
+                "❌ Conexão de tela não encontrada."
             );
 
             return;
         }
 
-
-        // Só aplica a resposta se
-        // estivermos esperando uma
 
         if (
             conexao.signalingState !==
@@ -548,7 +1287,7 @@ socket.on(
         ) {
 
             console.warn(
-                "⚠️ Resposta ignorada. Estado atual:",
+                "⚠️ Resposta de tela ignorada. Estado:",
                 conexao.signalingState
             );
 
@@ -556,17 +1295,19 @@ socket.on(
         }
 
 
-        await conexao.setRemoteDescription(
-            new RTCSessionDescription(
-                dados.resposta
-            )
-        );
+        await conexao
+            .setRemoteDescription(
+                new RTCSessionDescription(
+                    dados.resposta
+                )
+            );
+
     }
 );
 
 
 // ==============================
-// ICE CANDIDATE
+// ICE DA TELA
 // ==============================
 
 socket.on(
@@ -584,19 +1325,106 @@ socket.on(
 
         try {
 
-            await conexao.addIceCandidate(
-                new RTCIceCandidate(
-                    dados.candidate
-                )
-            );
+            await conexao
+                .addIceCandidate(
+                    new RTCIceCandidate(
+                        dados.candidate
+                    )
+                );
 
         } catch (erro) {
 
             console.error(
-                "❌ Erro ICE:",
+                "❌ Erro ICE da tela:",
                 erro
             );
+
         }
+
+    }
+);
+
+
+// ==============================
+// ICE DO MICROFONE
+// ==============================
+
+socket.on(
+    "ice-candidate-microfone",
+    async (dados) => {
+
+        const conexao =
+            conexoesMicrofone[
+                dados.de
+            ];
+
+
+        if (!conexao) {
+            return;
+        }
+
+
+        try {
+
+            await conexao
+                .addIceCandidate(
+                    new RTCIceCandidate(
+                        dados.candidate
+                    )
+                );
+
+        } catch (erro) {
+
+            console.error(
+                "❌ Erro ICE do microfone:",
+                erro
+            );
+
+        }
+
+    }
+);
+
+
+// ==============================
+// MICROFONE PAROU
+// ==============================
+
+socket.on(
+    "microfone-parado",
+    (idPessoa) => {
+
+        console.log(
+            "🔇 Microfone parado:",
+            idPessoa
+        );
+
+
+        const conexao =
+            conexoesMicrofone[
+                idPessoa
+            ];
+
+
+        if (conexao) {
+
+            conexao.close();
+
+
+            delete conexoesMicrofone[
+                idPessoa
+            ];
+
+        }
+
+
+        streamAudioRemoto =
+            new MediaStream();
+
+
+        audioRemoto.srcObject =
+            null;
+
     }
 );
 
@@ -614,43 +1442,58 @@ socket.on(
         );
 
 
-        videoRemoto.srcObject = null;
+        videoRemoto.srcObject =
+            null;
+
 
         statusSala.textContent =
             "🟢 Você está na sala";
 
 
-        Object.values(conexoes)
-            .forEach((conexao) => {
+        Object.values(
+            conexoes
+        ).forEach(
+            (conexao) => {
 
                 conexao.close();
 
-            });
+            }
+        );
 
 
         conexoes = {};
+
     }
 );
+
 
 // ==============================
 // PARTICIPANTES
 // ==============================
-function adicionarParticipante(id, nome) {
 
-    // Evitar duplicados
+function adicionarParticipante(
+    id,
+    nome
+) {
 
     if (
         document.querySelector(
             `[data-id="${id}"]`
         )
     ) {
+
         return;
+
     }
 
-    const item = 
+
+    const item =
         document.createElement("li");
 
-    item.dataset.id = id;
+
+    item.dataset.id =
+        id;
+
 
     item.innerHTML = `
         <span class="avatar-participante">👤</span>
@@ -658,52 +1501,114 @@ function adicionarParticipante(id, nome) {
         <span class="status-participante">●</span>
     `;
 
-    listaParticipantes.appendChild(item);
+
+    listaParticipantes
+        .appendChild(item);
+
 }
 
-socket.on("pessoa-na-sala", (dados) => {
 
-    adicionarParticipante(
-        dados.id,
-        dados.nome
-    );
-});
+// ==============================
+// PESSOA NA SALA
+// ==============================
 
-socket.on("nova-pessoa", (dados) => {
+socket.on(
+    "pessoa-na-sala",
+    (dados) => {
 
-    adicionarParticipante(
-        dados.id,
-        dados.nome
-    );
-
-    console.log(
-        `👤 ${dados.nome} entrou na sala`
-    );
-});
-
-socket.on("pessoa-saiu", (dados) => {
-
-    console.log(
-        `👋 ${dados.nome} saiu da sala`
-    );
-
-    const participante =
-        document.querySelector(
-            `[data-id="${dados.id}"]`
+        adicionarParticipante(
+            dados.id,
+            dados.nome
         );
 
-    if (participante) {
-        participante.remove();
     }
+);
 
-    // Fechar conexão WebRTC dessa pessoa
-    const conexao = conexoes[dados.id];
 
-    if (conexao) {
-        conexao.close();
-        delete conexoes[dados.id];
+// ==============================
+// NOVA PESSOA
+// ==============================
+
+socket.on(
+    "nova-pessoa",
+    (dados) => {
+
+        adicionarParticipante(
+            dados.id,
+            dados.nome
+        );
+
+
+        console.log(
+            `👤 ${dados.nome} entrou na sala`
+        );
+
     }
-});
+);
+
+
+// ==============================
+// PESSOA SAIU
+// ==============================
+
+socket.on(
+    "pessoa-saiu",
+    (dados) => {
+
+        console.log(
+            `👋 ${dados.nome} saiu da sala`
+        );
+
+
+        const participante =
+            document.querySelector(
+                `[data-id="${dados.id}"]`
+            );
+
+
+        if (participante) {
+
+            participante.remove();
+
+        }
+
+
+        // Tela
+        const conexaoTela =
+            conexoes[dados.id];
+
+
+        if (conexaoTela) {
+
+            conexaoTela.close();
+
+            delete conexoes[
+                dados.id
+            ];
+
+        }
+
+
+        // Microfone
+        const conexaoMicrofone =
+            conexoesMicrofone[
+                dados.id
+            ];
+
+
+        if (conexaoMicrofone) {
+
+            conexaoMicrofone.close();
+
+            delete conexoesMicrofone[
+                dados.id
+            ];
+
+        }
+
+    }
+);
+
 
 // ==============================
 // TELA CHEIA — REMOTA
@@ -713,17 +1618,22 @@ btnTelaCheia.addEventListener(
     "click",
     async () => {
 
-        if (!videoRemoto.srcObject) {
+        if (
+            !videoRemoto.srcObject
+        ) {
 
             alert(
                 "Ainda não existe uma transmissão."
             );
 
             return;
+
         }
 
 
-        await videoRemoto.requestFullscreen();
+        await videoRemoto
+            .requestFullscreen();
+
     }
 );
 
@@ -743,9 +1653,12 @@ btnTelaCheiaLocal.addEventListener(
             );
 
             return;
+
         }
 
 
-        await video.requestFullscreen();
+        await video
+            .requestFullscreen();
+
     }
 );

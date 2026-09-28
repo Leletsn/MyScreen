@@ -255,6 +255,7 @@ video {
     gap: 20px;
     margin-top: 20px;
     text-align: left;
+    align-items: start;
 }
 
 .painel-participantes {
@@ -264,6 +265,7 @@ video {
     padding: 15px;
     box-shadow: 4px 4px 0 #40384a;
     text-align: left;
+    height: fit-content;
 }
 
 .painel-participantes h3 {
@@ -318,4 +320,44 @@ video {
         grid-template-columns: 1fr;
     }
 
+}
+
+/* =========================
+   JANELA DO MYSCREEN
+========================= */
+
+.janela-topo {
+    height: 38px;
+    margin: -35px -35px 25px;
+    padding: 0 14px;
+
+    background-color: #e9e3d7;
+    border-bottom: 2px solid #40384a;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    box-sizing: border-box;
+}
+
+.botoes-janela {
+    display: flex;
+    gap: 7px;
+}
+
+.botoes-janela span {
+    width: 11px;
+    height: 11px;
+
+    background-color: #d99ab5;
+    border: 2px solid #40384a;
+    border-radius: 50%;
+}
+
+.titulo-janela {
+    color: #686172;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
 }

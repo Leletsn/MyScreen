@@ -3,214 +3,572 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const app = express();
+
 const server = http.createServer(app);
+
 const io = new Server(server);
 
-const transmissores = new Map();
+
+// ============================
+// SERVIR ARQUIVOS
+// ============================
 
 app.use(express.static(__dirname));
 
+
+// ============================
+// CONTROLE DAS SALAS
+// ============================
+
+// Pessoa transmitindo a tela
+const transmissores = new Map();
+
+// Pessoa com microfone ligado
+const microfones = new Map();
+
+
+// ============================
+// CONEXÃO
+// ============================
+
 io.on("connection", (socket) => {
 
-    console.log("👤 Pessoa conectada:", socket.id);
+    console.log(
+        "👤 Pessoa conectada:",
+        socket.id
+    );
+
+
+    // ============================
+    // ENTRAR NA SALA
+    // ============================
 
     socket.on("entrar-na-sala", (dados) => {
 
-    const codigoSala = dados.codigoSala;
-    const nome = dados.nome;
+        const codigoSala =
+            dados.codigoSala;
 
-    socket.nome = nome;
-    socket.sala = codigoSala;
+        const nome =
+            dados.nome;
 
-    socket.join(codigoSala);
 
-    console.log(
-        `🏠 ${nome} entrou na sala ${codigoSala}`
-    );
+        socket.sala =
+            codigoSala;
 
-    // Avisar as outras pessoas
-    socket.to(codigoSala).emit(
-        "nova-pessoa",
-        {
-            id: socket.id,
-            nome: nome
-        }
-    );
+        socket.nome =
+            nome;
 
-    // Enviar para quem entrou a lista
-    // das pessoas que já estavam na sala
 
-    const sala = io.sockets.adapter.rooms.get(codigoSala);
+        socket.join(codigoSala);
 
-    if (sala) {
 
-        sala.forEach((idPessoa) => {
+        console.log(
+            `🏠 ${nome} entrou na sala ${codigoSala}`
+        );
 
-            const pessoa = io.sockets.sockets.get(idPessoa);
 
-            if (
-                pessoa &&
-                idPessoa !== socket.id &&
-                pessoa.nome
-            ) {
-
-                socket.emit(
-                    "pessoa-na-sala",
-                    {
-                        id: idPessoa,
-                        nome: pessoa.nome
-                    }
-                );
+        // Avisar quem já estava na sala
+        socket.to(codigoSala).emit(
+            "nova-pessoa",
+            {
+                id: socket.id,
+                nome: nome
             }
-        });
-    }
+        );
 
-    // Se já existe transmissão,
-    // avisar quem acabou de entrar
+
+        // ============================
+        // VERIFICAR TRANSMISSÃO
+        // ============================
 
         const transmissor =
-        transmissores.get(codigoSala);
+            transmissores.get(codigoSala);
 
-    if (
-        transmissor &&
-        transmissor !== socket.id
-    ) {
+        if (
+            transmissor &&
+            transmissor !== socket.id
+        ) {
 
-        socket.emit(
-            "transmissao-disponivel",
-            transmissor
-        );
-    }
-});
-
-    socket.on("iniciar-transmissao", (codigoSala) => {
-
-        transmissores.set(codigoSala, socket.id);
-
-        console.log(
-            `📺 ${socket.id} começou a transmitir na sala ${codigoSala}`
-        );
-
-        socket.to(codigoSala).emit(
-            "transmissao-disponivel",
-            socket.id
-        );
-    });
-
-    socket.on("parar-transmissao", (codigoSala) => {
-
-        if (transmissores.get(codigoSala) === socket.id) {
-            transmissores.delete(codigoSala);
-        }
-
-        console.log(
-            `🛑 ${socket.id} parou de transmitir`
-        );
-
-        socket.to(codigoSala).emit("transmissao-parada");
-    });
-
-    // OFERTA
-    socket.on("oferta", (dados) => {
-
-        io.to(dados.para).emit("oferta", {
-            de: socket.id,
-            oferta: dados.oferta
-        });
-    });
-
-    // RESPOSTA
-    socket.on("resposta", (dados) => {
-
-        io.to(dados.para).emit("resposta", {
-            de: socket.id,
-            resposta: dados.resposta
-        });
-    });
-
-    // ICE
-    socket.on("ice-candidate", (dados) => {
-
-        io.to(dados.para).emit("ice-candidate", {
-            de: socket.id,
-            candidate: dados.candidate
-        });
-    });
-
-    socket.on("sair-da-sala", () => {
-
-    const codigoSala = socket.sala;
-
-        if (!codigoSala) {
-            return;
-        }
-
-        console.log(
-        `🚪 ${socket.nome} saiu da sala ${codigoSala}`
-        );
-
-        // Se essa pessoa estava transmitindo
-        if (transmissores.get(codigoSala) === socket.id) {
-
-         transmissores.delete(codigoSala);
-
-            socket.to(codigoSala).emit(
-            "transmissao-parada"
+            socket.emit(
+                "transmissao-disponivel",
+                transmissor
             );
         }
 
-        // Avisar as outras pessoas
-        socket.to(codigoSala).emit(
-            "pessoa-saiu",
-            {
-                id: socket.id,
-                nome: socket.nome
-            }
-        );
 
-        // Tirar a pessoa da sala
-        socket.leave(codigoSala);
+        // ============================
+        // VERIFICAR MICROFONE
+        // ============================
 
-        // Limpar os dados da pessoa
-        socket.sala = null;
-        socket.nome = null;
+        const microfone =
+            microfones.get(codigoSala);
+
+        if (
+            microfone &&
+            microfone !== socket.id
+        ) {
+
+            socket.emit(
+                "microfone-disponivel",
+                microfone
+            );
+        }
+
+
+        // ============================
+        // ENVIAR PARTICIPANTES
+        // ============================
+
+        const sala =
+            io.sockets.adapter.rooms.get(
+                codigoSala
+            );
+
+        if (sala) {
+
+            sala.forEach((idPessoa) => {
+
+                if (
+                    idPessoa === socket.id
+                ) {
+                    return;
+                }
+
+
+                const pessoa =
+                    io.sockets.sockets.get(
+                        idPessoa
+                    );
+
+
+                if (
+                    pessoa &&
+                    pessoa.nome
+                ) {
+
+                    socket.emit(
+                        "pessoa-na-sala",
+                        {
+                            id: idPessoa,
+                            nome: pessoa.nome
+                        }
+                    );
+                }
+
+            });
+        }
+
     });
 
-    socket.on("disconnect", () => {
 
-    console.log(
-        `👋 ${socket.nome || socket.id} saiu do servidor.`
-    );
+    // ============================
+    // INICIAR TRANSMISSÃO
+    // ============================
 
-    const codigoSala = socket.sala;
+    socket.on(
+        "iniciar-transmissao",
+        (codigoSala) => {
 
-    if (!codigoSala) {
-        return;
-    }
+            transmissores.set(
+                codigoSala,
+                socket.id
+            );
 
-    // Se a pessoa estava transmitindo
-    if (transmissores.get(codigoSala) === socket.id) {
 
-        transmissores.delete(codigoSala);
+            console.log(
+                `📺 ${socket.id} começou a transmitir`
+            );
 
-        socket.to(codigoSala).emit(
-            "transmissao-parada"
-        );
-    }
 
-    // Avisar as outras pessoas
-    // que essa pessoa saiu
-    socket.to(codigoSala).emit(
-        "pessoa-saiu",
-        {
-            id: socket.id,
-            nome: socket.nome
+            socket.to(codigoSala).emit(
+                "transmissao-disponivel",
+                socket.id
+            );
+
         }
     );
-});
+
+
+    // ============================
+    // PARAR TRANSMISSÃO
+    // ============================
+
+    socket.on(
+        "parar-transmissao",
+        (codigoSala) => {
+
+            if (
+                transmissores.get(
+                    codigoSala
+                ) === socket.id
+            ) {
+
+                transmissores.delete(
+                    codigoSala
+                );
+            }
+
+
+            console.log(
+                `🛑 ${socket.id} parou de transmitir`
+            );
+
+
+            socket.to(codigoSala).emit(
+                "transmissao-parada"
+            );
+
+        }
+    );
+
+
+    // ============================
+    // INICIAR MICROFONE
+    // ============================
+
+    socket.on(
+        "iniciar-microfone",
+        (codigoSala) => {
+
+            microfones.set(
+                codigoSala,
+                socket.id
+            );
+
+
+            console.log(
+                `🎤 ${socket.id} ligou o microfone`
+            );
+
+
+            socket.to(codigoSala).emit(
+                "microfone-disponivel",
+                socket.id
+            );
+
+        }
+    );
+
+
+    // ============================
+    // PARAR MICROFONE
+    // ============================
+
+    socket.on(
+        "parar-microfone",
+        (codigoSala) => {
+
+            if (
+                microfones.get(
+                    codigoSala
+                ) === socket.id
+            ) {
+
+                microfones.delete(
+                    codigoSala
+                );
+            }
+
+
+            console.log(
+                `🔇 ${socket.id} desligou o microfone`
+            );
+
+
+            socket.to(codigoSala).emit(
+                "microfone-parado",
+                socket.id
+            );
+
+        }
+    );
+
+
+    // ============================
+    // OFERTA — TELA
+    // ============================
+
+    socket.on(
+        "oferta",
+        (dados) => {
+
+            io.to(dados.para).emit(
+                "oferta",
+                {
+                    de: socket.id,
+                    oferta: dados.oferta
+                }
+            );
+
+        }
+    );
+
+
+    // ============================
+    // RESPOSTA — TELA
+    // ============================
+
+    socket.on(
+        "resposta",
+        (dados) => {
+
+            io.to(dados.para).emit(
+                "resposta",
+                {
+                    de: socket.id,
+                    resposta: dados.resposta
+                }
+            );
+
+        }
+    );
+
+
+    // ============================
+    // ICE — TELA
+    // ============================
+
+    socket.on(
+        "ice-candidate",
+        (dados) => {
+
+            io.to(dados.para).emit(
+                "ice-candidate",
+                {
+                    de: socket.id,
+                    candidate: dados.candidate
+                }
+            );
+
+        }
+    );
+
+
+    // ============================
+    // OFERTA — MICROFONE
+    // ============================
+
+    socket.on(
+        "oferta-microfone",
+        (dados) => {
+
+            io.to(dados.para).emit(
+                "oferta-microfone",
+                {
+                    de: socket.id,
+                    oferta: dados.oferta
+                }
+            );
+
+        }
+    );
+
+
+    // ============================
+    // RESPOSTA — MICROFONE
+    // ============================
+
+    socket.on(
+        "resposta-microfone",
+        (dados) => {
+
+            io.to(dados.para).emit(
+                "resposta-microfone",
+                {
+                    de: socket.id,
+                    resposta: dados.resposta
+                }
+            );
+
+        }
+    );
+
+
+    // ============================
+    // ICE — MICROFONE
+    // ============================
+
+    socket.on(
+        "ice-candidate-microfone",
+        (dados) => {
+
+            io.to(dados.para).emit(
+                "ice-candidate-microfone",
+                {
+                    de: socket.id,
+                    candidate: dados.candidate
+                }
+            );
+
+        }
+    );
+
+
+    // ============================
+    // SAIR DA SALA
+    // ============================
+
+    socket.on(
+        "sair-da-sala",
+        () => {
+
+            const codigoSala =
+                socket.sala;
+
+
+            if (!codigoSala) {
+                return;
+            }
+
+
+            console.log(
+                `🚪 ${socket.nome} saiu da sala ${codigoSala}`
+            );
+
+
+            // Remover transmissão
+            if (
+                transmissores.get(
+                    codigoSala
+                ) === socket.id
+            ) {
+
+                transmissores.delete(
+                    codigoSala
+                );
+
+
+                socket.to(codigoSala).emit(
+                    "transmissao-parada"
+                );
+            }
+
+
+            // Remover microfone
+            if (
+                microfones.get(
+                    codigoSala
+                ) === socket.id
+            ) {
+
+                microfones.delete(
+                    codigoSala
+                );
+
+
+                socket.to(codigoSala).emit(
+                    "microfone-parado",
+                    socket.id
+                );
+            }
+
+
+            // Avisar que saiu
+            socket.to(codigoSala).emit(
+                "pessoa-saiu",
+                {
+                    id: socket.id,
+                    nome: socket.nome
+                }
+            );
+
+
+            socket.leave(codigoSala);
+
+            socket.sala = null;
+
+            socket.nome = null;
+
+        }
+    );
+
+
+    // ============================
+    // DESCONECTAR
+    // ============================
+
+    socket.on(
+        "disconnect",
+        () => {
+
+            console.log(
+                "👋 Pessoa saiu:",
+                socket.id
+            );
+
+
+            const codigoSala =
+                socket.sala;
+
+
+            if (!codigoSala) {
+                return;
+            }
+
+
+            // Remover microfone
+            if (
+                microfones.get(
+                    codigoSala
+                ) === socket.id
+            ) {
+
+                microfones.delete(
+                    codigoSala
+                );
+
+
+                socket.to(codigoSala).emit(
+                    "microfone-parado",
+                    socket.id
+                );
+            }
+
+
+            // Remover transmissão
+            if (
+                transmissores.get(
+                    codigoSala
+                ) === socket.id
+            ) {
+
+                transmissores.delete(
+                    codigoSala
+                );
+
+
+                socket.to(codigoSala).emit(
+                    "transmissao-parada"
+                );
+            }
+
+
+            // Avisar que saiu
+            socket.to(codigoSala).emit(
+                "pessoa-saiu",
+                {
+                    id: socket.id,
+                    nome: socket.nome
+                }
+            );
+
+        }
+    );
 
 });
 
-server.listen(3000, () => {
-    console.log("🎀 MyScreen rodando em http://localhost:3000");
-});
+
+// ============================
+// SERVIDOR
+// ============================
+
+server.listen(
+    3000,
+    () => {
+
+        console.log(
+            "🎀 MyScreen rodando em http://localhost:3000"
+        );
+
+    }
+);
