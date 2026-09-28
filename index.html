@@ -18,19 +18,21 @@
 
         <p>Compartilhe sua tela com seus amigos.</p>
 
-        
+
         <!-- NOME DO USUÁRIO -->
 
         <div class="nome-usuario">
 
             <input
-            type="text"
-            id="inputNome"
-            placeholder="Digite seu nome"
-            maxlength="20">
+                type="text"
+                id="inputNome"
+                placeholder="Digite seu nome"
+                maxlength="20"
+            >
 
         </div>
-        
+
+
         <!-- CRIAR SALA -->
 
         <button id="btnCriarSala">
@@ -55,79 +57,126 @@
         </div>
 
 
-        <!-- SALA -->
+        <!-- =========================
+             SALA
+        ========================== -->
 
         <div id="areaSala" style="display: none;">
 
-            <h2>🏠 Sala</h2>
 
-            <p id="codigoSala"></p>
+            <!-- CABEÇALHO DA SALA -->
 
-            <button id="btnCopiar">
-                📋 Copiar código
-            </button>
+            <div class="cabecalho-sala">
 
-            <button id="btnSairSala">
-                🚪 Sair da sala
-            </button>
+                <div>
+
+                    <h2>🏠 Sala</h2>
+
+                    <p id="codigoSala"></p>
+
+                </div>
+
+
+                <div class="acoes-sala">
+
+                    <button id="btnCopiar">
+                        📋 Copiar código
+                    </button>
+
+                    <button id="btnSairSala">
+                        🚪 Sair
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATUS -->
 
             <p id="statusSala"></p>
 
-            
-            <!-- PARTICIPANTES -->
 
-            <div class="participantes">
+            <!-- CONTEÚDO DA SALA -->
 
-                <h3>👥 Pessoas na sala</h3>
+            <div class="conteudo-sala">
 
-                <ul id="listaParticipantes"></ul>
+
+                <!-- PARTICIPANTES -->
+
+                <div class="painel-participantes">
+
+                    <h3>👥 Participantes</h3>
+
+                    <ul id="listaParticipantes"></ul>
+
+                </div>
+
+
+                <!-- VÍDEOS -->
+
+                <div class="area-videos">
+
+
+                    <!-- MINHA TELA -->
+
+                    <div class="video-container">
+
+                        <h3>🖥️ Minha tela</h3>
+
+                        <video
+                            id="videoTela"
+                            autoplay
+                            muted
+                        ></video>
+
+                        <button id="btnTelaCheiaLocal">
+                            ⛶ Tela cheia
+                        </button>
+
+                    </div>
+
+
+                    <!-- TELA RECEBIDA -->
+
+                    <div class="video-container">
+
+                        <h3>👀 Tela recebida</h3>
+
+                        <video
+                            id="videoRemoto"
+                            autoplay
+                        ></video>
+
+                        <button id="btnTelaCheia">
+                            ⛶ Tela cheia
+                        </button>
+
+                    </div>
+
+
+                </div>
 
             </div>
 
 
-            
-            <hr>
+            <!-- CONTROLES -->
 
+            <div class="controles-sala">
 
-            <!-- COMPARTILHAR TELA -->
-
-            <button id="btnCompartilhar">
-                🖥️ Compartilhar tela
-            </button>
-
-
-            <!-- VÍDEOS -->
-
-            <div class="videos">
-
-                <div class="video-container">
-                
-                    <h3>🖥️ Minha tela</h3>
-
-                    <video id="videoTela" autoplay muted></video>
-
-                    <button id="btnTelaCheiaLocal">
-                     ⛶ Tela cheia
-                    </button>
-                </div>
-
-
-                <div class="video-container">
-                    
-                    <h3>👀 Tela recebida</h3>
-
-                    <video id="videoRemoto" autoplay></video>
-
-                    <button id="btnTelaCheia">
-                        ⛶ Tela cheia
-                    </button>
-                </div>
+                <button id="btnCompartilhar">
+                    🖥️ Compartilhar tela
+                </button>
 
             </div>
+
 
         </div>
+        <!-- FIM DA SALA -->
+
 
     </div>
+    <!-- FIM DO CONTAINER -->
 
 
     <!-- SOCKET.IO -->

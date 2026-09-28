@@ -647,13 +647,16 @@ function adicionarParticipante(id, nome) {
         return;
     }
 
-    const item =
+    const item = 
         document.createElement("li");
 
     item.dataset.id = id;
 
-    item.textContent =
-        `🟢 ${nome}`;
+    item.innerHTML = `
+        <span class="avatar-participante">👤</span>
+        <span class="nome-participante">${nome}</span>
+        <span class="status-participante">●</span>
+    `;
 
     listaParticipantes.appendChild(item);
 }
