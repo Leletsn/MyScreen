@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MyScreen 🎀</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🎀 MyScreen</h1>
+
+        <p>Compartilhe sua tela com seus amigos.</p>
+
+        
+        <!-- NOME DO USUÁRIO -->
+
+        <div class="nome-usuario">
+
+            <input
+            type="text"
+            id="inputNome"
+            placeholder="Digite seu nome"
+            maxlength="20">
+
+        </div>
+        
+        <!-- CRIAR SALA -->
+
+        <button id="btnCriarSala">
+            ✨ Criar sala
+        </button>
+
+
+        <!-- ENTRAR EM SALA -->
+
+        <div class="entrar">
+
+            <input
+                type="text"
+                id="inputSala"
+                placeholder="Digite o código da sala"
+            >
+
+            <button id="btnEntrarSala">
+                🚪 Entrar na sala
+            </button>
+
+        </div>
+
+
+        <!-- SALA -->
+
+        <div id="areaSala" style="display: none;">
+
+            <h2>🏠 Sala</h2>
+
+            <p id="codigoSala"></p>
+
+            <button id="btnCopiar">
+                📋 Copiar código
+            </button>
+
+            <p id="statusSala"></p>
+
+            
+            <!-- PARTICIPANTES -->
+
+            <div class="participantes">
+
+                <h3>👥 Pessoas na sala</h3>
+
+                <ul id="listaParticipantes"></ul>
+
+            </div>
+
+
+            
+            <hr>
+
+
+            <!-- COMPARTILHAR TELA -->
+
+            <button id="btnCompartilhar">
+                🖥️ Compartilhar tela
+            </button>
+
+
+            <!-- VÍDEOS -->
+
+            <div class="videos">
+
+                <div class="video-container">
+                
+                    <h3>🖥️ Minha tela</h3>
+
+                    <video id="videoTela" autoplay muted></video>
+
+                    <button id="btnTelaCheiaLocal">
+                     ⛶ Tela cheia
+                    </button>
+                </div>
+
+
+                <div class="video-container">
+                    
+                    <h3>👀 Tela recebida</h3>
+
+                    <video id="videoRemoto" autoplay></video>
+
+                    <button id="btnTelaCheia">
+                        ⛶ Tela cheia
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SOCKET.IO -->
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- JAVASCRIPT -->
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

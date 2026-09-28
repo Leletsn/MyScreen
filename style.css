@@ -1,0 +1,191 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8eaf1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 100vh;
+}
+
+.container {
+    background-color: white;
+
+    width: 85%;
+    max-width: 900px;
+
+    padding: 40px;
+
+    border-radius: 20px;
+
+    text-align: center;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #d65c91;
+    font-size: 32px;
+}
+
+h2 {
+    margin-top: 25px;
+}
+
+p {
+    font-size: 16px;
+}
+
+
+/* =========================
+   BOTÕES
+========================= */
+
+button {
+    background-color: #d65c91;
+    color: white;
+
+    border: none;
+
+    padding: 14px 22px;
+
+    border-radius: 10px;
+
+    font-size: 16px;
+
+    cursor: pointer;
+
+    margin: 6px;
+
+    transition: 0.2s;
+}
+
+button:hover {
+    background-color: #c4497d;
+    transform: translateY(-1px);
+}
+
+
+/* =========================
+   ENTRAR NA SALA
+========================= */
+
+.entrar {
+    margin-top: 20px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+}
+
+input {
+    width: 220px;
+
+    padding: 12px;
+
+    border: 1px solid #bbb;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================
+   ÁREA DA SALA
+========================= */
+
+#areaSala {
+    margin-top: 25px;
+}
+
+#codigoSala {
+    font-size: 18px;
+
+    font-weight: bold;
+}
+
+#statusSala {
+    color: #555;
+}
+
+
+/* =========================
+   LINHA
+========================= */
+
+hr {
+    margin: 25px 0;
+
+    border: none;
+
+    border-top: 1px solid #ddd;
+}
+
+
+/* =========================
+   VÍDEO
+========================= */
+
+video {
+    display: block;
+
+    width: 100%;
+
+    max-height: 500px;
+
+    margin: 25px auto 0;
+
+    border-radius: 15px;
+
+    background-color: #222;
+
+    object-fit: contain;
+}
+
+.nome-usuario {
+    margin: 20px 0;
+}
+
+.nome-usuario input {
+    width: 250px;
+}
+
+
+.participantes {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #fafafa;
+    border-radius: 12px;
+    text-align: left;
+}
+
+.participantes h3 {
+    margin-top: 0;
+    color: #555;
+}
+
+
+#listaParticipantes {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 0;
+}
+
+
+#listaParticipantes li {
+    padding: 8px 10px;
+    margin-top: 6px;
+    background-color: #f8eaf1;
+    border-radius: 8px;
+}
